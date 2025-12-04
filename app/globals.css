@@ -3,9 +3,18 @@
 @tailwind utilities;
 
 :root {
-  --primary: #0A1A2F;
-  --accent: #2563EB;
-  --secondary: #F3F4F6;
+  /* Brand colors */
+  --brand-teal: #005B62; /* primary */
+  --brand-teal-dark: #00474D;
+  --brand-orange: #D99125; /* accent */
+  --brand-orange-dark: #B7791F;
+
+  /* Neutrals */
+  --white: #FFFFFF;
+  --rich-black: #0B0C0C;
+  --slate-gray: #2E3A40;
+  --soft-gray: #F2F4F5;
+  --border-gray: #CBD5E1;
 }
 
 @layer base {
@@ -13,7 +22,9 @@
     scroll-behavior: smooth;
   }
   body {
-    @apply bg-white text-gray-900;
+    font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    color: var(--rich-black);
+    background: var(--white);
   }
   *::-webkit-scrollbar {
     width: 10px;
@@ -32,32 +43,68 @@
 
 @layer components {
   .btn-primary {
-    @apply bg-accent hover:bg-accent-dark text-white font-semibold py-3 px-8 rounded-lg transition-all duration-300 hover:shadow-lg hover:scale-105;
+    background: var(--brand-orange);
+    color: var(--rich-black);
+    font-weight: 600;
+    padding: 0.75rem 2rem;
+    border-radius: 8px;
+    transition: transform .18s ease, box-shadow .18s ease, background-color .12s ease;
+    box-shadow: 0 1px 0 rgba(0,0,0,0.02);
   }
-  
+  .btn-primary:hover {
+    background: var(--brand-orange-dark);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+  }
+
   .btn-secondary {
-    @apply bg-primary hover:bg-primary-light text-white font-semibold py-3 px-8 rounded-lg transition-all duration-300 hover:shadow-lg;
+    background: var(--brand-teal);
+    color: var(--white);
+    font-weight: 600;
+    padding: 0.75rem 2rem;
+    border-radius: 8px;
+    transition: background-color .12s ease, transform .18s ease, box-shadow .18s ease;
   }
-  
+  .btn-secondary:hover {
+    background: var(--brand-teal-dark);
+    transform: translateY(-2px);
+  }
+
   .btn-outline {
-    @apply border-2 border-accent text-accent hover:bg-accent hover:text-white font-semibold py-3 px-8 rounded-lg transition-all duration-300;
+    border: 2px solid var(--brand-teal);
+    color: var(--brand-teal);
+    padding: 0.75rem 2rem;
+    border-radius: 8px;
+    font-weight: 600;
+    transition: background-color .12s ease, color .12s ease;
   }
-  
+  .btn-outline:hover {
+    background: var(--brand-teal);
+    color: var(--white);
+  }
+
   .section-padding {
     @apply py-16 md:py-24 px-4 md:px-8;
   }
-  
+
   .container-custom {
     @apply max-w-7xl mx-auto;
   }
-  
+
   .card {
-    @apply bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 p-6 md:p-8;
+    background: var(--white);
+    border: 1px solid var(--border-gray);
+    border-radius: 12px;
+    padding: 1.5rem;
+    transition: box-shadow .12s ease, transform .12s ease;
   }
-  
-  .gradient-bg {
-    @apply bg-gradient-to-br from-primary via-primary-light to-accent;
+  .card:hover {
+    box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+    transform: translateY(-4px);
   }
+
+  /* Hero / overlay backgrounds should use solid primary color only */
+  .gradient-bg { background: var(--brand-teal); }
 
   .animate-fade-in {
     animation: fadeIn 0.8s ease-in-out forwards;
@@ -74,7 +121,8 @@
 
 @layer utilities {
   .text-gradient {
-    @apply bg-gradient-to-r from-accent to-primary bg-clip-text text-transparent;
+    /* removed gradients; use accent color for highlights */
+    color: var(--brand-orange);
   }
   .bg-grid-pattern {
     background-image: radial-gradient(rgba(255,255,255,0.2) 1px, transparent 1px);
@@ -91,11 +139,47 @@
   }
 }
 
+
+/* Form and input utilities */
+.input-default {
+  background: var(--white);
+  border: 1px solid var(--border-gray);
+  padding: .75rem 1rem;
+  border-radius: 8px;
+}
+.input-default:focus {
+  outline: none;
+  box-shadow: 0 0 0 4px rgba(0,91,98,0.06);
+  border-color: var(--brand-teal);
+}
+.placeholder-muted::placeholder { color: #64748B; }
+
 @keyframes float {
   0% { transform: translateY(0px); }
   50% { transform: translateY(-10px); }
   100% { transform: translateY(0px); }
 }
+
+/* Compatibility overrides: remap common Tailwind gray utility classes to brand neutrals */
+.text-gray-900 { color: var(--rich-black) !important; }
+.text-gray-800 { color: var(--rich-black) !important; }
+.text-gray-700 { color: var(--slate-gray) !important; }
+.text-gray-600 { color: var(--slate-gray) !important; }
+.text-gray-500 { color: rgba(46,58,64,0.8) !important; }
+.text-gray-400 { color: rgba(46,58,64,0.65) !important; }
+.text-gray-300 { color: var(--soft-gray) !important; }
+.text-gray-200 { color: var(--white) !important; }
+.text-gray-100 { color: var(--soft-gray) !important; }
+
+.text-rich-black { color: var(--rich-black) !important; }
+
+/* Divider utility */
+.divide-gray-200 > :not([hidden]) ~ :not([hidden]) { border-color: var(--border-gray) !important; }
+
+/* Background override for any blue accents previously used */
+.bg-blue-500 { background-color: var(--brand-teal) !important; }
+.bg-blue-500\/20 { background-color: rgba(0,91,98,0.2) !important; }
+
 
 @keyframes slowSpin {
   from { transform: rotate(0deg); }

@@ -57,21 +57,21 @@ export default function ContactPage() {
 
           <form onSubmit={(e) => e.preventDefault()} className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <label className="sr-only" htmlFor="name">Name</label>
-            <input id="name" name="name" placeholder="Name" required className="px-4 py-3 rounded-md bg-secondary border border-transparent focus:ring-2 focus:ring-accent/30" />
+            <input id="name" name="name" placeholder="Name" required className="input-default placeholder-muted" />
 
             <label className="sr-only" htmlFor="phone">Phone</label>
-            <input id="phone" name="phone" placeholder="Phone" className="px-4 py-3 rounded-md bg-secondary border border-transparent focus:ring-2 focus:ring-accent/30" />
+            <input id="phone" name="phone" placeholder="Phone" className="input-default placeholder-muted" />
 
             <label className="sr-only" htmlFor="email">Email</label>
-            <input id="email" name="email" type="email" placeholder="Email" required className="px-4 py-3 rounded-md bg-secondary border border-transparent focus:ring-2 focus:ring-accent/30" />
+            <input id="email" name="email" type="email" placeholder="Email" required className="input-default placeholder-muted" />
 
             <label className="sr-only" htmlFor="website">Website</label>
-            <input id="website" name="website" placeholder="Website" className="px-4 py-3 rounded-md bg-secondary border border-transparent focus:ring-2 focus:ring-accent/30" />
+            <input id="website" name="website" placeholder="Website" className="input-default placeholder-muted" />
 
             <label className="sr-only" htmlFor="message">Message</label>
-            <textarea id="message" name="message" placeholder="Message" required className="px-4 py-3 rounded-md bg-secondary border border-transparent md:col-span-2 h-36 resize-none focus:ring-2 focus:ring-accent/30"></textarea>
+            <textarea id="message" name="message" placeholder="Message" required className="input-default placeholder-muted md:col-span-2 h-36 resize-none"></textarea>
 
-            <button type="submit" className="md:col-span-2 inline-flex items-center justify-center gap-2 bg-accent-dark hover:bg-accent text-white font-semibold py-3 px-6 rounded-md">
+            <button type="submit" className="md:col-span-2 btn-primary">
               Submit Now
               <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" /></svg>
             </button>

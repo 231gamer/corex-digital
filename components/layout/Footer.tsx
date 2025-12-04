@@ -30,7 +30,7 @@ const Footer = () => {
           {/* Company Info */}
           <div>
             <div className="flex items-center space-x-2 mb-4">
-              <div className="w-10 h-10 bg-gradient-to-br from-accent to-white rounded-lg flex items-center justify-center">
+              <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center">
                 <span className="text-primary font-bold text-xl">CX</span>
               </div>
               <span className="text-xl font-bold">CoreX Digital</span>
@@ -118,7 +118,7 @@ const Footer = () => {
         </div>
 
         {/* Bottom Bar */}
-        <div className="border-t border-gray-700 mt-12 pt-8 text-center">
+        <div className="border-t mt-12 pt-8 text-center" style={{ borderColor: 'var(--border-gray)' }}>
           <p className="text-gray-400">
             &copy; {currentYear} CoreX Digital Solutions. All rights reserved.
           </p>

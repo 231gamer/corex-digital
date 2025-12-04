@@ -10,23 +10,28 @@ const config: Config = {
     extend: {
       colors: {
         primary: {
-          DEFAULT: '#0A1A2F',
-          light: '#1a2f4a',
-          dark: '#050d17',
+          DEFAULT: '#005B62', // Teal-Green
+          light: '#007174',
+          dark: '#00474D',
         },
         accent: {
-          DEFAULT: '#2563EB',
-          light: '#3b82f6',
-          dark: '#1d4ed8',
+          DEFAULT: '#D99125', // Orange-Gold
+          light: '#E6A24A',
+          dark: '#B7791F',
         },
         secondary: {
-          DEFAULT: '#F3F4F6',
-          light: '#F9FAFB',
-          dark: '#E5E7EB',
+          DEFAULT: '#F2F4F5', // Soft Gray (alternate sections)
+        },
+        neutral: {
+          white: '#FFFFFF',
+          richblack: '#0B0C0C',
+          slate: '#2E3A40',
+          soft: '#F2F4F5',
+          border: '#CBD5E1',
         },
       },
       fontFamily: {
-        sans: ['var(--font-inter)', 'system-ui', 'sans-serif'],
+        sans: ['Inter', 'system-ui', 'sans-serif'],
       },
       animation: {
         'fade-in': 'fadeIn 0.6s ease-in-out',
