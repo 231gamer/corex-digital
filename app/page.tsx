@@ -341,7 +341,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Impact Metrics / Stats (inspired by design attachment) */}
       <section className="section-padding bg-secondary">
         <div className="container-custom">
           <AnimateOnScroll>
