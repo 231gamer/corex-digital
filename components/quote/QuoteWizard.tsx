@@ -342,7 +342,7 @@ export default function QuoteWizard() {
                           value={form.phone}
                           onChange={handleInputChange}
                           className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-[#D99125] focus:ring-1 focus:ring-[#D99125] md:text-base"
-                          placeholder="+231 ..."
+                          placeholder="+231-777-352002"
                         />
                       </div>
                     </div>

@@ -291,7 +291,7 @@ Each page includes:
 ## 📞 Contact
 
 - **Email:** info@corexdigital.com
-- **Phone:** +231 XXX XXX XXX
+- **Phone:** +231-777-352002 / +231-555-770641
 - **Location:** Monrovia, Liberia
 
 ---

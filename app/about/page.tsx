@@ -161,7 +161,7 @@ export default function AboutPage() {
                   </div>
                   <div className="leading-tight">
                     <div className="text-xs uppercase tracking-wide text-gray-500">Call Anytime</div>
-                    <div className="text-sm font-semibold text-primary">+231 777 123 456</div>
+                    <div className="text-sm font-semibold text-primary">+231-777-352002</div>
                   </div>
                 </div>
               </div>

@@ -97,9 +97,9 @@ async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
               <div>
                 <h4 className="font-bold text-primary">Phone Call</h4>
                 <p className="text-gray-600">
-                  (+231) 77 000 0000
+                  +231-777-352002
                   <br />
-                  (+231) 88 000 0000
+                  +231-555-770641
                 </p>
               </div>
             </div>
