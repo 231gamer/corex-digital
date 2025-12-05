@@ -2,22 +2,10 @@
 
 import Link from 'next/link';
 import { useState } from 'react';
-import { Menu, X, ChevronDown } from 'lucide-react';
+import { Menu, X } from 'lucide-react';
 
 const Header = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [servicesOpen, setServicesOpen] = useState(false);
-
-  const services = [
-    { name: 'Website Development', href: '/services/website-development' },
-    { name: 'Mobile App Development', href: '/services/mobile-app-development' },
-    { name: 'Software Development', href: '/services/software-development' },
-    { name: 'Branding & Digital Marketing', href: '/services/branding-marketing' },
-    { name: 'UI/UX Design', href: '/services/ui-ux-design' },
-    { name: 'IT Support & Consultancy', href: '/services/it-support' },
-    { name: 'Cloud & Hosting Solutions', href: '/services/cloud-hosting' },
-    { name: 'Training & Capacity Building', href: '/services/training' },
-  ];
 
   return (
     <header className="fixed w-full bg-white/95 backdrop-blur-sm shadow-md z-50">
@@ -44,26 +32,9 @@ const Header = () => {
             <Link href="/about" className="text-gray-700 hover:text-accent transition-colors font-medium">
               About
             </Link>
-            
-            {/* Services Dropdown */}
-            <div className="relative group">
-              <button className="text-gray-700 hover:text-accent transition-colors font-medium flex items-center">
-                Services <ChevronDown className="ml-1 w-4 h-4" />
-              </button>
-              <div className="absolute top-full left-0 mt-2 w-64 bg-white shadow-xl rounded-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300">
-                <div className="py-2">
-                  {services.map((service) => (
-                    <Link
-                      key={service.href}
-                      href={service.href}
-                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-secondary hover:text-accent transition-colors"
-                    >
-                      {service.name}
-                    </Link>
-                  ))}
-                </div>
-              </div>
-            </div>
+            <Link href="/services" className="text-gray-700 hover:text-accent transition-colors font-medium">
+              Services
+            </Link>
 
             <Link href="/portfolio" className="text-gray-700 hover:text-accent transition-colors font-medium">
               Portfolio
@@ -104,30 +75,9 @@ const Header = () => {
             <Link href="/about" className="block text-gray-700 hover:text-accent transition-colors font-medium">
               About
             </Link>
-            
-            {/* Mobile Services Dropdown */}
-            <div>
-              <button
-                onClick={() => setServicesOpen(!servicesOpen)}
-                className="flex items-center justify-between w-full text-gray-700 hover:text-accent transition-colors font-medium"
-              >
-                Services
-                <ChevronDown className={`w-4 h-4 transition-transform ${servicesOpen ? 'rotate-180' : ''}`} />
-              </button>
-              {servicesOpen && (
-                <div className="mt-2 ml-4 space-y-2">
-                  {services.map((service) => (
-                    <Link
-                      key={service.href}
-                      href={service.href}
-                      className="block text-sm text-gray-600 hover:text-accent transition-colors"
-                    >
-                      {service.name}
-                    </Link>
-                  ))}
-                </div>
-              )}
-            </div>
+            <Link href="/services" className="block text-gray-700 hover:text-accent transition-colors font-medium">
+              Services
+            </Link>
 
             <Link href="/portfolio" className="block text-gray-700 hover:text-accent transition-colors font-medium">
               Portfolio

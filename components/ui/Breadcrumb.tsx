@@ -8,23 +8,31 @@ interface BreadcrumbItem {
 
 interface BreadcrumbProps {
   items: BreadcrumbItem[];
+  variant?: 'default' | 'light';
 }
 
-const Breadcrumb = ({ items }: BreadcrumbProps) => {
+const Breadcrumb = ({ items, variant = 'default' }: BreadcrumbProps) => {
+  const linkClass =
+    variant === 'light'
+      ? 'text-white/80 hover:text-white transition-colors'
+      : 'text-gray-500 hover:text-accent transition-colors';
+  const activeClass = variant === 'light' ? 'text-white font-semibold' : 'text-gray-900 font-medium';
+  const iconClass = variant === 'light' ? 'text-white/60' : 'text-gray-400';
+
   return (
-    <nav className="flex items-center space-x-2 text-sm mb-8">
-      <Link href="/" className="text-gray-500 hover:text-accent transition-colors">
+    <nav className={`flex items-center space-x-2 text-sm mb-8 ${variant === 'light' ? 'text-white/80' : ''}`}>
+      <Link href="/" className={linkClass}>
         Home
       </Link>
       {items.map((item, index) => (
         <div key={index} className="flex items-center space-x-2">
-          <ChevronRight className="w-4 h-4 text-gray-400" />
+          <ChevronRight className={`w-4 h-4 ${iconClass}`} />
           {item.href ? (
-            <Link href={item.href} className="text-gray-500 hover:text-accent transition-colors">
+            <Link href={item.href} className={linkClass}>
               {item.label}
             </Link>
           ) : (
-            <span className="text-gray-900 font-medium">{item.label}</span>
+            <span className={activeClass}>{item.label}</span>
           )}
         </div>
       ))}
