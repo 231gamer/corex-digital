@@ -1,19 +1,12 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+// prisma/schema.prisma
 
 generator client {
   provider = "prisma-client-js"
 }
 
-
 datasource db {
   provider = "postgresql"
 }
-
-
 
 model ContactMessage {
   id        Int      @id @default(autoincrement())
@@ -25,3 +18,69 @@ model ContactMessage {
   read      Boolean  @default(false)
 }
 
+// ========= NEW STUFF STARTS HERE =========
+
+model ProjectInquiry {
+  id            Int           @id @default(autoincrement())
+  fullName      String
+  email         String
+  phone         String?
+  companyName   String?
+
+  // Array of selected services from the wizard
+  services      Json
+
+  // Only used when "Others" is selected
+  otherService  String?
+
+  // Dropdown value (1-2 weeks, 2-4 weeks, etc.)
+  duration      String
+
+  // "Under $500", "$500 - $1k", etc.
+  projectBudget String
+
+  // Detailed description textarea
+  details       String
+
+  status        InquiryStatus @default(NEW)
+
+  createdAt     DateTime      @default(now())
+}
+
+enum InquiryStatus {
+  NEW
+  IN_PROGRESS
+  CLOSED
+  ARCHIVED
+}
+
+model NewsletterSubscriber {
+  id             Int       @id @default(autoincrement())
+  email          String    @unique
+  source         String?
+  createdAt      DateTime  @default(now())
+  unsubscribedAt DateTime?
+}
+
+model TeamMember {
+  id          Int      @id @default(autoincrement())
+  name        String
+  role        String
+  bio         String
+  avatarUrl   String?
+  linkedInUrl String?
+  xUrl        String?
+  order       Int      @default(0)
+  createdAt   DateTime @default(now())
+}
+
+model Testimonial {
+  id        Int      @id @default(autoincrement())
+  name      String
+  role      String?
+  company   String?
+  message   String
+  avatarUrl String?
+  highlight Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
