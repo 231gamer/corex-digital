@@ -3,7 +3,8 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 
-import SuccessModal from "@/app/components/ui/SuccessModal";
+import SuccessModal from "@/components/ui/SuccessModal";
+
 
 export default function ContactForm() {
   const [form, setForm] = useState({
