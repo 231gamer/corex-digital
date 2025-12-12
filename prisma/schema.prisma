@@ -18,7 +18,7 @@ model ContactMessage {
   read      Boolean  @default(false)
 }
 
-// ========= NEW STUFF STARTS HERE =========
+
 
 model ProjectInquiry {
   id            Int           @id @default(autoincrement())
