@@ -123,14 +123,14 @@ const Footer = () => {
 
         {/* Bottom Bar */}
         <div className="border-t mt-12 pt-8 text-center" style={{ borderColor: 'var(--border-gray)' }}>
-          <p className="text-gray-400">
+          <p className="text-gray-200">
             &copy; {currentYear} CoreX Digital Solutions. All rights reserved.
           </p>
           <div className="mt-2 space-x-4">
-            <Link href="/privacy" className="text-gray-400 hover:text-accent transition-colors text-sm">
+            <Link href="/privacy" className="text-gray-200 hover:text-accent transition-colors text-sm">
               Privacy Policy
             </Link>
-            <Link href="/terms" className="text-gray-400 hover:text-accent transition-colors text-sm">
+            <Link href="/terms" className="text-gray-200 hover:text-accent transition-colors text-sm">
               Terms of Service
             </Link>
           </div>

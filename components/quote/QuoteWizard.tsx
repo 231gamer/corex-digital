@@ -2,7 +2,13 @@
 'use client'
 
 import { useState } from 'react'
+import { z } from 'zod'
 import { motion, AnimatePresence } from 'framer-motion'
+import {
+  QuoteStep1Schema,
+  QuoteStep2Schema,
+  QuoteStep3Schema,
+} from '@/lib/validation/quote'
 
 const SERVICES_OPTIONS = [
   'Website Development',
@@ -67,17 +73,32 @@ export default function QuoteWizard() {
   const [serverError, setServerError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
 
+  // field-level errors
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({})
+
   const totalSteps = 3
   const progress = (step / totalSteps) * 100
+
+  const clearTopMessages = () => {
+    setUiError(null)
+    setServerError(null)
+    setSuccess(false)
+  }
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
   ) => {
     const { name, value } = e.target
+
     setForm(prev => ({ ...prev, [name]: value }))
-    setUiError(null)
-    setServerError(null)
-    setSuccess(false)
+
+    // clear field-level error for that input only
+    setFieldErrors(prev => {
+      const { [name]: _removed, ...rest } = prev
+      return rest
+    })
+
+    clearTopMessages()
   }
 
   const handleServiceToggle = (service: string) => {
@@ -87,95 +108,101 @@ export default function QuoteWizard() {
         ? prev.services.filter(s => s !== service)
         : [...prev.services, service]
 
-      return { ...prev, services: nextServices }
+      // if "Others" got unchecked, clear otherService
+      const nextOther =
+        nextServices.includes('Others') ? prev.otherService : ''
+
+      return { ...prev, services: nextServices, otherService: nextOther }
     })
-    setUiError(null)
-    setServerError(null)
-    setSuccess(false)
+
+    setFieldErrors(prev => {
+      const next = { ...prev }
+      delete next.services
+      delete next.otherService
+      return next
+    })
+
+    clearTopMessages()
   }
 
   const handleBudgetChange = (value: BudgetOption) => {
     setForm(prev => ({ ...prev, projectBudget: value }))
-    setUiError(null)
-    setServerError(null)
-    setSuccess(false)
+
+    setFieldErrors(prev => {
+      const next = { ...prev }
+      delete next.projectBudget
+      return next
+    })
+
+    clearTopMessages()
   }
 
-  // --- validation ---
+  // ----------------------------
+  // Zod validation per step
+  // ----------------------------
 
-  const canGoNext = () => {
-    if (step === 1) {
-      return (
-        form.fullName.trim() !== '' &&
-        form.email.trim() !== '' &&
-        form.phone.trim() !== ''
-      )
+  const validateCurrentStep = () => {
+    clearTopMessages()
+
+    const schema =
+      step === 1 ? QuoteStep1Schema : step === 2 ? QuoteStep2Schema : QuoteStep3Schema
+
+    const data =
+      step === 1
+        ? {
+            fullName: form.fullName,
+            companyName: form.companyName,
+            email: form.email,
+            phone: form.phone,
+          }
+        : step === 2
+        ? {
+            services: form.services,
+            otherService: form.otherService,
+            duration: form.duration,
+          }
+        : {
+            projectBudget: form.projectBudget,
+            details: form.details,
+          }
+
+    const result = schema.safeParse(data)
+
+    if (!result.success) {
+      const nextErrors: Record<string, string> = {}
+
+      for (const issue of result.error.issues) {
+        const key = String(issue.path?.[0] ?? 'form')
+        // keep the first error per field (avoids flicker / overwrites)
+        if (!nextErrors[key]) nextErrors[key] = issue.message
+      }
+
+      setFieldErrors(nextErrors)
+      setUiError('Fix the highlighted fields to continue.')
+      return false
     }
-    if (step === 2) {
-      if (form.services.length === 0) return false
-      if (form.services.includes('Others') && form.otherService.trim() === '')
-        return false
-      return form.duration.trim() !== ''
-    }
-    if (step === 3) {
-      return form.projectBudget !== '' && form.details.trim().length >= 20
-    }
+
+    setFieldErrors({})
     return true
   }
 
-  const getStepValidationMessage = () => {
-    if (step === 1) {
-      return 'Please provide your full name, email, and phone number.'
-    }
-    if (step === 2) {
-      if (form.services.length === 0) {
-        return 'Select at least one service you need.'
-      }
-      if (form.services.includes('Others') && form.otherService.trim() === '') {
-        return 'Describe the “Other” service you need.'
-      }
-      if (!form.duration.trim()) {
-        return 'Select the expected project duration.'
-      }
-      return 'Please complete the required fields for this step.'
-    }
-    if (step === 3) {
-      if (!form.projectBudget) {
-        return 'Select a project budget range.'
-      }
-      if (form.details.trim().length < 20) {
-        return 'Add a bit more detail about your project (at least 20 characters).'
-      }
-      return 'Please complete the required fields for this step.'
-    }
-    return 'Please complete the required fields.'
-  }
-
   const handleNext = () => {
-    if (!canGoNext()) {
-      setUiError(getStepValidationMessage())
-      return
-    }
-    setUiError(null)
+    if (!validateCurrentStep()) return
     setStep(prev => Math.min(prev + 1, totalSteps))
   }
 
   const handleBack = () => {
-    setUiError(null)
-    setServerError(null)
+    clearTopMessages()
+    setFieldErrors({})
     setStep(prev => Math.max(prev - 1, 1))
   }
 
   const handleSubmit = async () => {
-    if (!canGoNext()) {
-      setUiError(getStepValidationMessage())
-      return
-    }
+    // step should be 3, but validate anyway
+    if (!validateCurrentStep()) return
 
     setIsSubmitting(true)
-    setUiError(null)
-    setServerError(null)
-    setSuccess(false)
+    clearTopMessages()
 
     try {
       const payload = {
@@ -206,17 +233,47 @@ export default function QuoteWizard() {
 
       setSuccess(true)
       setForm(initialState)
+      setFieldErrors({})
       setStep(1)
     } catch (err: any) {
-      setServerError(err.message || 'Something went wrong. Please try again.')
+      setServerError(err?.message || 'Something went wrong. Please try again.')
     } finally {
       setIsSubmitting(false)
     }
   }
 
+  // convenience: used for button state
+  const stepIsValid = () => {
+    const schema =
+      step === 1 ? QuoteStep1Schema : step === 2 ? QuoteStep2Schema : QuoteStep3Schema
+
+    const data =
+      step === 1
+        ? {
+            fullName: form.fullName,
+            companyName: form.companyName,
+            email: form.email,
+            phone: form.phone,
+          }
+        : step === 2
+        ? {
+            services: form.services,
+            otherService: form.otherService,
+            duration: form.duration,
+          }
+        : {
+            projectBudget: form.projectBudget,
+            details: form.details,
+          }
+
+    return schema.safeParse(data).success
+  }
+
+  const canProceed = stepIsValid()
+
   return (
     <div className="relative py-12">
-      {/* Subtle teal/orange blobs, low opacity so they don't bleach the white page */}
+      {/* Subtle teal/orange blobs */}
       <motion.div
         className="pointer-events-none absolute -top-32 -left-24 h-72 w-72 rounded-full bg-[#005B62]/12 blur-3xl"
         animate={{ y: [0, 20, 0], opacity: [0.2, 0.4, 0.2] }}
@@ -230,7 +287,7 @@ export default function QuoteWizard() {
 
       <div className="relative mx-auto max-w-6xl px-4">
         <div className="grid gap-8 lg:grid-cols-[minmax(0,2.2fr)_minmax(0,1.3fr)]">
-          {/* Form card – glass on white, dark text */}
+          {/* Form card */}
           <motion.div
             className="rounded-3xl border border-[#005B62]/18 bg-white/80 p-6 text-slate-900 shadow-2xl backdrop-blur-md md:p-8"
             initial={{ opacity: 0, y: 20 }}
@@ -246,19 +303,10 @@ export default function QuoteWizard() {
                   Share a few details about your project. We’ll respond with a tailored estimate.
                 </p>
               </div>
-                <div
-                className="
-                    hidden 
-                    md:block 
-                    text-right 
-                    font-medium 
-                    text-slate-600 
-                    text-[0.8rem]   
-                    whitespace-nowrap 
-                ">
-                Step {step} of {totalSteps}
-                </div>
 
+              <div className="hidden whitespace-nowrap text-right text-[0.8rem] font-medium text-slate-600 md:block">
+                Step {step} of {totalSteps}
+              </div>
             </div>
 
             <div className="mb-5 h-2 w-full overflow-hidden rounded-full bg-slate-200">
@@ -298,9 +346,16 @@ export default function QuoteWizard() {
                         name="fullName"
                         value={form.fullName}
                         onChange={handleInputChange}
-                        className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-[#D99125] focus:ring-1 focus:ring-[#D99125] md:text-base"
+                        className={`w-full rounded-xl border bg-white px-4 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 md:text-base ${
+                          fieldErrors.fullName
+                            ? 'border-red-400 focus:border-red-500 focus:ring-1 focus:ring-red-500'
+                            : 'border-slate-200 focus:border-[#D99125] focus:ring-1 focus:ring-[#D99125]'
+                        }`}
                         placeholder="e.g. John Doe"
                       />
+                      {fieldErrors.fullName && (
+                        <p className="mt-1 text-xs text-red-600">{fieldErrors.fullName}</p>
+                      )}
                     </div>
 
                     <div>
@@ -312,9 +367,16 @@ export default function QuoteWizard() {
                         name="companyName"
                         value={form.companyName}
                         onChange={handleInputChange}
-                        className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-[#D99125] focus:ring-1 focus:ring-[#D99125] md:text-base"
+                        className={`w-full rounded-xl border bg-white px-4 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 md:text-base ${
+                          fieldErrors.companyName
+                            ? 'border-red-400 focus:border-red-500 focus:ring-1 focus:ring-red-500'
+                            : 'border-slate-200 focus:border-[#D99125] focus:ring-1 focus:ring-[#D99125]'
+                        }`}
                         placeholder="e.g. Corex Digital Solutions"
                       />
+                      {fieldErrors.companyName && (
+                        <p className="mt-1 text-xs text-red-600">{fieldErrors.companyName}</p>
+                      )}
                     </div>
 
                     <div className="grid gap-5 md:grid-cols-2">
@@ -327,9 +389,16 @@ export default function QuoteWizard() {
                           name="email"
                           value={form.email}
                           onChange={handleInputChange}
-                          className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-[#D99125] focus:ring-1 focus:ring-[#D99125] md:text-base"
+                          className={`w-full rounded-xl border bg-white px-4 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 md:text-base ${
+                            fieldErrors.email
+                              ? 'border-red-400 focus:border-red-500 focus:ring-1 focus:ring-red-500'
+                              : 'border-slate-200 focus:border-[#D99125] focus:ring-1 focus:ring-[#D99125]'
+                          }`}
                           placeholder="you@example.com"
                         />
+                        {fieldErrors.email && (
+                          <p className="mt-1 text-xs text-red-600">{fieldErrors.email}</p>
+                        )}
                       </div>
 
                       <div>
@@ -341,9 +410,16 @@ export default function QuoteWizard() {
                           name="phone"
                           value={form.phone}
                           onChange={handleInputChange}
-                          className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-[#D99125] focus:ring-1 focus:ring-[#D99125] md:text-base"
-                          placeholder="+231-777-352002"
+                          className={`w-full rounded-xl border bg-white px-4 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 md:text-base ${
+                            fieldErrors.phone
+                              ? 'border-red-400 focus:border-red-500 focus:ring-1 focus:ring-red-500'
+                              : 'border-slate-200 focus:border-[#D99125] focus:ring-1 focus:ring-[#D99125]'
+                          }`}
+                          placeholder="+231 ..."
                         />
+                        {fieldErrors.phone && (
+                          <p className="mt-1 text-xs text-red-600">{fieldErrors.phone}</p>
+                        )}
                       </div>
                     </div>
                   </motion.div>
@@ -365,6 +441,11 @@ export default function QuoteWizard() {
                       <p className="mb-3 text-xs text-slate-600 md:text-sm">
                         You can select more than one service.
                       </p>
+
+                      {fieldErrors.services && (
+                        <p className="mb-2 text-xs text-red-600 md:text-sm">{fieldErrors.services}</p>
+                      )}
+
                       <div className="grid gap-2.5 md:grid-cols-2">
                         {SERVICES_OPTIONS.map(option => {
                           const selected = form.services.includes(option)
@@ -396,17 +477,23 @@ export default function QuoteWizard() {
                       {form.services.includes('Others') && (
                         <div className="mt-4">
                           <label className="mb-1 block text-xs font-medium text-[#005B62] md:text-sm">
-                            Please specify other services
-                            <span className="text-[#D99125]">*</span>
+                            Please specify other services <span className="text-[#D99125]">*</span>
                           </label>
                           <input
                             type="text"
                             name="otherService"
                             value={form.otherService}
                             onChange={handleInputChange}
-                            className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-[#D99125] focus:ring-1 focus:ring-[#D99125] md:text-base"
+                            className={`w-full rounded-xl border bg-white px-4 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 md:text-base ${
+                              fieldErrors.otherService
+                                ? 'border-red-400 focus:border-red-500 focus:ring-1 focus:ring-red-500'
+                                : 'border-slate-200 focus:border-[#D99125] focus:ring-1 focus:ring-[#D99125]'
+                            }`}
                             placeholder="e.g. Product strategy, maintenance, etc."
                           />
+                          {fieldErrors.otherService && (
+                            <p className="mt-1 text-xs text-red-600">{fieldErrors.otherService}</p>
+                          )}
                         </div>
                       )}
                     </div>
@@ -419,7 +506,11 @@ export default function QuoteWizard() {
                         name="duration"
                         value={form.duration}
                         onChange={handleInputChange}
-                        className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-[#D99125] focus:ring-1 focus:ring-[#D99125] md:text-base"
+                        className={`w-full rounded-xl border bg-white px-4 py-3 text-sm text-slate-900 outline-none transition md:text-base ${
+                          fieldErrors.duration
+                            ? 'border-red-400 focus:border-red-500 focus:ring-1 focus:ring-red-500'
+                            : 'border-slate-200 focus:border-[#D99125] focus:ring-1 focus:ring-[#D99125]'
+                        }`}
                       >
                         <option value="">Select duration</option>
                         {DURATION_OPTIONS.map(option => (
@@ -428,6 +519,9 @@ export default function QuoteWizard() {
                           </option>
                         ))}
                       </select>
+                      {fieldErrors.duration && (
+                        <p className="mt-1 text-xs text-red-600">{fieldErrors.duration}</p>
+                      )}
                     </div>
                   </motion.div>
                 )}
@@ -448,6 +542,13 @@ export default function QuoteWizard() {
                       <p className="mb-3 text-xs text-slate-600 md:text-sm">
                         This helps us propose the right solution for your budget.
                       </p>
+
+                      {fieldErrors.projectBudget && (
+                        <p className="mb-2 text-xs text-red-600 md:text-sm">
+                          {fieldErrors.projectBudget}
+                        </p>
+                      )}
+
                       <div className="grid gap-2.5 md:grid-cols-2">
                         {BUDGET_OPTIONS.map(option => {
                           const selected = form.projectBudget === option
@@ -481,12 +582,19 @@ export default function QuoteWizard() {
                         name="details"
                         value={form.details}
                         onChange={handleInputChange}
-                        className="min-h-[140px] w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-[#D99125] focus:ring-1 focus:ring-[#D99125] md:text-base"
+                        className={`min-h-[140px] w-full rounded-xl border bg-white px-4 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 md:text-base ${
+                          fieldErrors.details
+                            ? 'border-red-400 focus:border-red-500 focus:ring-1 focus:ring-red-500'
+                            : 'border-slate-200 focus:border-[#D99125] focus:ring-1 focus:ring-[#D99125]'
+                        }`}
                         placeholder="Example: We need a modern website or app with clear sections for services, portfolio, contact, and possibly a dashboard..."
                       />
                       <p className="mt-1 text-[11px] text-slate-500 md:text-xs">
                         Minimum 20 characters so we understand what you want.
                       </p>
+                      {fieldErrors.details && (
+                        <p className="mt-1 text-xs text-red-600">{fieldErrors.details}</p>
+                      )}
                     </div>
                   </motion.div>
                 )}
@@ -496,16 +604,8 @@ export default function QuoteWizard() {
             {/* Validation + server messages */}
             {(uiError || serverError || success) && (
               <div className="mt-4 space-y-1 text-xs md:text-sm">
-                {uiError && (
-                  <p className="text-[#B45309]">
-                    {uiError}
-                  </p>
-                )}
-                {serverError && (
-                  <p className="text-red-600">
-                    {serverError}
-                  </p>
-                )}
+                {uiError && <p className="text-[#B45309]">{uiError}</p>}
+                {serverError && <p className="text-red-600">{serverError}</p>}
                 {success && !serverError && (
                   <p className="text-emerald-700">
                     Thanks! Your request has been received. We’ll get back to you shortly.
@@ -520,6 +620,7 @@ export default function QuoteWizard() {
                 <span className="inline-block h-2 w-2 rounded-full bg-emerald-500" />
                 Secure & confidential – we never share your project details.
               </div>
+
               <div className="flex items-center justify-end gap-3">
                 {step > 1 && (
                   <button
@@ -530,12 +631,13 @@ export default function QuoteWizard() {
                     Back
                   </button>
                 )}
+
                 {step < totalSteps && (
                   <button
                     type="button"
                     onClick={handleNext}
                     className={`rounded-xl px-5 py-2.5 text-xs font-semibold md:text-sm transition ${
-                      canGoNext()
+                      canProceed
                         ? 'bg-[#D99125] text-white hover:bg-[#f0a63a]'
                         : 'bg-slate-200 text-slate-500'
                     }`}
@@ -543,13 +645,14 @@ export default function QuoteWizard() {
                     Next
                   </button>
                 )}
+
                 {step === totalSteps && (
                   <button
                     type="button"
                     onClick={handleSubmit}
                     disabled={isSubmitting}
                     className={`rounded-xl px-5 py-2.5 text-xs font-semibold md:text-sm transition ${
-                      !isSubmitting
+                      !isSubmitting && canProceed
                         ? 'bg-[#D99125] text-white hover:bg-[#f0a63a]'
                         : 'bg-slate-200 text-slate-500'
                     }`}
@@ -561,7 +664,7 @@ export default function QuoteWizard() {
             </div>
           </motion.div>
 
-          {/* Pricing teaser / info card – also light, teal/orange accents */}
+          {/* Pricing teaser / info card */}
           <motion.aside
             className="relative h-full rounded-3xl border border-[#005B62]/30 bg-white/80 p-6 text-slate-900 shadow-2xl backdrop-blur-md md:p-7"
             initial={{ opacity: 0, y: 24 }}

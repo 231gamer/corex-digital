@@ -1,11 +1,24 @@
 'use client';
 
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { useState } from 'react';
 import { Menu, X } from 'lucide-react';
 
 const Header = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const pathname = usePathname();
+
+  const isActive = (href: string) => {
+    if (href === '/') {
+      return pathname === '/';
+    }
+    return pathname.startsWith(href);
+  };
+
+  const handleNavClick = () => {
+    setMobileMenuOpen(false);
+  };
 
   return (
     <header className="fixed w-full bg-white/95 backdrop-blur-sm shadow-md z-50">
@@ -26,26 +39,26 @@ const Header = () => {
 
           {/* Desktop Navigation */}
           <div className="hidden lg:flex items-center space-x-8">
-            <Link href="/" className="text-gray-700 hover:text-accent transition-colors font-medium">
+            <Link href="/" className={`transition-colors font-medium ${isActive('/') ? 'text-accent' : 'text-gray-700 hover:text-accent'}`}>
               Home
             </Link>
-            <Link href="/about" className="text-gray-700 hover:text-accent transition-colors font-medium">
+            <Link href="/about" className={`transition-colors font-medium ${isActive('/about') ? 'text-accent' : 'text-gray-700 hover:text-accent'}`}>
               About
             </Link>
-            <Link href="/services" className="text-gray-700 hover:text-accent transition-colors font-medium">
+            <Link href="/services" className={`transition-colors font-medium ${isActive('/services') ? 'text-accent' : 'text-gray-700 hover:text-accent'}`}>
               Services
             </Link>
 
-            <Link href="/portfolio" className="text-gray-700 hover:text-accent transition-colors font-medium">
+            <Link href="/portfolio" className={`transition-colors font-medium ${isActive('/portfolio') ? 'text-accent' : 'text-gray-700 hover:text-accent'}`}>
               Portfolio
             </Link>
-            <Link href="/blog" className="text-gray-700 hover:text-accent transition-colors font-medium">
+            <Link href="/blog" className={`transition-colors font-medium ${isActive('/blog') ? 'text-accent' : 'text-gray-700 hover:text-accent'}`}>
               Blog
             </Link>
-            <Link href="/training" className="text-gray-700 hover:text-accent transition-colors font-medium">
+            <Link href="/training" className={`transition-colors font-medium ${isActive('/training') ? 'text-accent' : 'text-gray-700 hover:text-accent'}`}>
               Training
             </Link>
-            <Link href="/contact" className="text-gray-700 hover:text-accent transition-colors font-medium">
+            <Link href="/contact" className={`transition-colors font-medium ${isActive('/contact') ? 'text-accent' : 'text-gray-700 hover:text-accent'}`}>
               Contact
             </Link>
           </div>
@@ -69,29 +82,29 @@ const Header = () => {
         {/* Mobile Menu */}
         {mobileMenuOpen && (
           <div className="lg:hidden mt-4 pb-4 space-y-4 animate-fade-in">
-            <Link href="/" className="block text-gray-700 hover:text-accent transition-colors font-medium">
+            <Link href="/" onClick={handleNavClick} className={`block transition-colors font-medium ${isActive('/') ? 'text-accent' : 'text-gray-700 hover:text-accent'}`}>
               Home
             </Link>
-            <Link href="/about" className="block text-gray-700 hover:text-accent transition-colors font-medium">
+            <Link href="/about" onClick={handleNavClick} className={`block transition-colors font-medium ${isActive('/about') ? 'text-accent' : 'text-gray-700 hover:text-accent'}`}>
               About
             </Link>
-            <Link href="/services" className="block text-gray-700 hover:text-accent transition-colors font-medium">
+            <Link href="/services" onClick={handleNavClick} className={`block transition-colors font-medium ${isActive('/services') ? 'text-accent' : 'text-gray-700 hover:text-accent'}`}>
               Services
             </Link>
 
-            <Link href="/portfolio" className="block text-gray-700 hover:text-accent transition-colors font-medium">
+            <Link href="/portfolio" onClick={handleNavClick} className={`block transition-colors font-medium ${isActive('/portfolio') ? 'text-accent' : 'text-gray-700 hover:text-accent'}`}>
               Portfolio
             </Link>
-            <Link href="/blog" className="block text-gray-700 hover:text-accent transition-colors font-medium">
+            <Link href="/blog" onClick={handleNavClick} className={`block transition-colors font-medium ${isActive('/blog') ? 'text-accent' : 'text-gray-700 hover:text-accent'}`}>
               Blog
             </Link>
-            <Link href="/training" className="block text-gray-700 hover:text-accent transition-colors font-medium">
+            <Link href="/training" onClick={handleNavClick} className={`block transition-colors font-medium ${isActive('/training') ? 'text-accent' : 'text-gray-700 hover:text-accent'}`}>
               Training
             </Link>
-            <Link href="/contact" className="block text-gray-700 hover:text-accent transition-colors font-medium">
+            <Link href="/contact" onClick={handleNavClick} className={`block transition-colors font-medium ${isActive('/contact') ? 'text-accent' : 'text-gray-700 hover:text-accent'}`}>
               Contact
             </Link>
-            <Link href="/quote" className="btn-primary block text-center">
+            <Link href="/quote" onClick={handleNavClick} className="btn-primary block text-center">
               Get a Quote
             </Link>
           </div>
