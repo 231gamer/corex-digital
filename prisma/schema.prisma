@@ -84,3 +84,44 @@ model Testimonial {
   highlight Boolean  @default(false)
   createdAt DateTime @default(now())
 }
+
+model Post {
+  id          Int       @id @default(autoincrement())
+  title       String
+  slug        String    @unique
+  excerpt     String?
+  content     String    // markdown or HTML string
+  status      PostStatus @default(DRAFT)
+  publishedAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  category    String?
+  tags        String?   // comma-separated for now (keep it simple)
+}
+
+enum PostStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+model Training {
+  id            Int       @id @default(autoincrement())
+  title         String
+  slug          String    @unique
+  description   String
+  startDate     DateTime
+  endDate       DateTime?
+  location      String?
+  price         String?   // or money field later
+  status        TrainingStatus @default(UPCOMING)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+enum TrainingStatus {
+  UPCOMING
+  ONGOING
+  COMPLETED
+  CANCELLED
+}
